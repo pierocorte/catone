@@ -1,0 +1,9 @@
+{
+    "appName": "Farm Census",
+    "loginTitle": "Farm Census",
+    "loginSubtitle": "Enter your account Farm Census",
+    "loginButton": "Login",
+    "emailPlaceholder": "Insert your email",
+    "passwordPlaceholder": "Insert your password",
+    "cancel": "Cancel"
+}

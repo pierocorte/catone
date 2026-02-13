@@ -1,0 +1,598 @@
+openapi: 3.0.3
+info:
+  title: Auth + Users + AuthZ API
+  version: 1.0.0
+servers:
+  - url: http://localhost:3001
+
+paths:
+  # ---------------- AUTH ----------------
+  /auth/login:
+    post:
+      operationId: login
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginRequest" }
+      responses:
+        "200":
+          description: OK
+          headers:
+            Set-Cookie:
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TokenResponse" }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /auth/refresh:
+    post:
+      operationId: refresh
+      tags: [Auth]
+      parameters:
+        - name: refreshToken
+          in: cookie
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          headers:
+            Set-Cookie:
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TokenResponse" }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [Auth]
+      parameters:
+        - name: refreshToken
+          in: cookie
+          required: false
+          schema: { type: string }
+      responses:
+        "204":
+          description: No Content
+          headers:
+            Set-Cookie:
+              schema: { type: string }
+
+  /auth/verify:
+    get:
+      operationId: verify
+      tags: [Auth]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: X-Original-URI
+          in: header
+          required: false
+          schema: { type: string }
+        - name: X-Original-Method
+          in: header
+          required: false
+          schema: { $ref: "#/components/schemas/HttpMethodNoStar" }
+      responses:
+        "204":
+          description: Authorized
+          headers:
+            X-User-Id: { schema: { type: string } }
+            X-Roles: { schema: { type: string } }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  # ---------------- USERS ----------------
+  /users:
+    get:
+      operationId: listUsers
+      tags: [Users]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/User" } }
+    post:
+      operationId: createUser
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UserCreate" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /users/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      operationId: getUser
+      tags: [Users]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      operationId: replaceUser
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UserReplace" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+    patch:
+      operationId: patchUser
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UserPatch" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+    delete:
+      operationId: deleteUser
+      tags: [Users]
+      responses:
+        "204":
+          description: No Content
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /users/verify-password:
+    post:
+      operationId: verifyPassword
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/VerifyPasswordRequest" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/VerifyPasswordResponse" }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ---------------- AUTHZ ADMIN ----------------
+  /roles:
+    get:
+      operationId: listRoles
+      tags: [Roles]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Role" } }
+    post:
+      operationId: createRole
+      tags: [Roles]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RoleCreate" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Role" }
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /roles/{roleId}:
+    parameters:
+      - name: roleId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      operationId: getRole
+      tags: [Roles]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Role" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      operationId: patchRole
+      tags: [Roles]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RolePatch" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Role" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+    delete:
+      operationId: deleteRole
+      tags: [Roles]
+      responses:
+        "204":
+          description: No Content
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /permissions:
+    get:
+      operationId: listPermissions
+      tags: [Permissions]
+      parameters:
+        - name: method
+          in: query
+          required: false
+          schema: { $ref: "#/components/schemas/HttpMethod" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Permission" } }
+    post:
+      operationId: createPermission
+      tags: [Permissions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PermissionCreate" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Permission" }
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /permissions/{permissionId}:
+    parameters:
+      - name: permissionId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      operationId: getPermission
+      tags: [Permissions]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Permission" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      operationId: patchPermission
+      tags: [Permissions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PermissionPatch" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Permission" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+    delete:
+      operationId: deletePermission
+      tags: [Permissions]
+      responses:
+        "204":
+          description: No Content
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /roles/{roleId}/permissions:
+    parameters:
+      - name: roleId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      operationId: listRolePermissions
+      tags: [Bindings]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Permission" } }
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /roles/{roleId}/permissions/{permissionId}:
+    parameters:
+      - name: roleId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+      - name: permissionId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    put:
+      operationId: grantPermissionToRole
+      tags: [Bindings]
+      responses:
+        "204": { description: No Content }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      operationId: revokePermissionFromRole
+      tags: [Bindings]
+      responses:
+        "204": { description: No Content }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /users/{userId}/roles:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      operationId: listUserRoles
+      tags: [Bindings]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Role" } }
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /users/{userId}/roles/{roleId}:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+      - name: roleId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    put:
+      operationId: assignRoleToUser
+      tags: [Bindings]
+      responses:
+        "204": { description: No Content }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      operationId: unassignRoleFromUser
+      tags: [Bindings]
+      responses:
+        "204": { description: No Content }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+
+  schemas:
+    Error:
+      type: object
+      required: [message]
+      properties:
+        message: { type: string }
+        errors: { type: array, items: { type: object } }
+
+    HttpMethodNoStar:
+      type: string
+      enum: ["GET","POST","PUT","PATCH","DELETE"]
+
+    HttpMethod:
+      type: string
+      enum: ["GET","POST","PUT","PATCH","DELETE","*"]
+
+    # ---------- AUTH ----------
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, minLength: 1, writeOnly: true }
+
+    TokenResponse:
+      type: object
+      required: [accessToken, tokenType, expiresIn]
+      properties:
+        accessToken: { type: string }
+        tokenType: { type: string, enum: ["Bearer"] }
+        expiresIn: { type: integer }
+
+    # ---------- USERS ----------
+    User:
+      type: object
+      required: [id, email, displayName, roles, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        displayName: { type: string, minLength: 1, maxLength: 200 }
+        roles: { type: array, items: { type: string } }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    UserCreate:
+      type: object
+      required: [email, displayName, password]
+      properties:
+        email: { type: string, format: email }
+        displayName: { type: string, minLength: 1, maxLength: 200 }
+        password: { type: string, minLength: 8, writeOnly: true }
+
+    UserReplace:
+      type: object
+      required: [email, displayName]
+      properties:
+        email: { type: string, format: email }
+        displayName: { type: string, minLength: 1, maxLength: 200 }
+        password: { type: string, minLength: 8, writeOnly: true }
+
+    UserPatch:
+      type: object
+      minProperties: 1
+      properties:
+        email: { type: string, format: email }
+        displayName: { type: string, minLength: 1, maxLength: 200 }
+        password: { type: string, minLength: 8, writeOnly: true }
+
+    VerifyPasswordRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, minLength: 1, writeOnly: true }
+
+    VerifyPasswordResponse:
+      type: object
+      required: [id, email, displayName, roles]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        displayName: { type: string }
+        roles: { type: array, items: { type: string } }
+
+    # ---------- AUTHZ ----------
+    Role:
+      type: object
+      required: [id, name, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string, minLength: 1, maxLength: 80 }
+        description: { type: string, maxLength: 300 }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    RoleCreate:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 80 }
+        description: { type: string, maxLength: 300 }
+
+    RolePatch:
+      type: object
+      minProperties: 1
+      properties:
+        name: { type: string, minLength: 1, maxLength: 80 }
+        description: { type: string, maxLength: 300 }
+
+    Permission:
+      type: object
+      required: [id, method, pathPattern, effect, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        method: { $ref: "#/components/schemas/HttpMethod" }
+        pathPattern: { type: string, minLength: 1, maxLength: 300 }
+        effect: { type: string, enum: ["ALLOW"] }
+        description: { type: string, maxLength: 300 }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    PermissionCreate:
+      type: object
+      required: [method, pathPattern]
+      properties:
+        method: { $ref: "#/components/schemas/HttpMethod" }
+        pathPattern: { type: string, minLength: 1, maxLength: 300 }
+        effect: { type: string, enum: ["ALLOW"], default: "ALLOW" }
+        description: { type: string, maxLength: 300 }
+
+    PermissionPatch:
+      type: object
+      minProperties: 1
+      properties:
+        method: { $ref: "#/components/schemas/HttpMethod" }
+        pathPattern: { type: string, minLength: 1, maxLength: 300 }
+        effect: { type: string, enum: ["ALLOW"] }
+        description: { type: string, maxLength: 300 }

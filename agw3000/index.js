@@ -57,6 +57,8 @@ function buildTargetUrl(req) {
     return null;
 }
 
+app.get("/gping", (_req, res) => res.json({ status: "gpong" }));
+
 // Proxy for ALL methods (GET/POST/PUT/PATCH/DELETE)
 app.all("*", async (req, res) => {
     const targetUrl = buildTargetUrl(req);

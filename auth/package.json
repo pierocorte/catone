@@ -1,0 +1,37 @@
+{
+  "name": "auth",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "build": "nest build",
+    "gen:types": "openapi-typescript ./openapi/openapi.yaml -o ./src/openapi.ts"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/core": "^11.0.0",
+    "@nestjs/config": "^3.2.0",
+    "@nestjs/platform-express": "^11.0.0",
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "express": "^5.0.0",
+    "express-openapi-validator": "^5.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "neo4j-driver": "^5.26.0",
+    "path-to-regexp": "^6.2.2",
+    "swagger-ui-express": "^5.0.0",
+    "yaml": "^2.5.1"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.0",
+    "@types/bcrypt": "^5.0.2",
+    "@types/cookie-parser": "^1.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/swagger-ui-express": "^4.1.6",
+    "openapi-typescript": "^7.4.1",
+    "typescript": "^5.6.0"
+  }
+}

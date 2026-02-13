@@ -1,0 +1,14 @@
+@font-face {
+    font-family: 'SymbolsOutlined';
+    src: url('./MaterialSymbolsOutlined-VariableFont_FILL,GRAD,opsz,wght.ttf');
+}
+
+@font-face {
+    font-family: 'SymbolsRounded';
+    src: url('./MaterialSymbolsRounded.ttf');
+}
+
+@font-face {
+    font-family: 'SymbolsSharp';
+    src: url('./MaterialSymbolsSharp-VariableFont_FILL,GRAD,opsz,wght.ttf');
+}

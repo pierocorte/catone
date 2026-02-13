@@ -1,0 +1,47 @@
+@font-face {
+    font-family: 'Montserrat';
+    src: url('./Montserrat-VariableFont_wght.ttf');
+}
+
+@font-face {
+    font-family: 'Montserrat';
+    src: url('./Montserrat-Italic-VariableFont_wght.ttf');
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('./RobotoSerif-VariableFont_GRAD,opsz,wdth,wght.ttf');
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('./RobotoSerif-Italic-VariableFont_GRAD,opsz,wdth,wght.ttf');
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Fraunces';
+    src: url('./Fraunces-VariableFont_SOFT,WONK,opsz,wght.ttf');
+}
+
+@font-face {
+    font-family: 'Fraunces';
+    src: url('./Fraunces-Italic-VariableFont_SOFT,WONK,opsz,wght.ttf');
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Recursive';
+    src: url('./Recursive-VariableFont_CASL,CRSV,MONO,slnt,wght.ttf');
+}
+
+@font-face {
+    font-family: 'Emoji';
+    src: url('./NotoEmoji-VariableFont_wght.ttf');
+}
+
+@font-face {
+    font-family: 'Symbols';
+    src: url('./NotoSansSymbols-VariableFont_wght.ttf');
+}
