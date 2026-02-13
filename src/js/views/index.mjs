@@ -1,7 +1,0 @@
-import './app_splash.mjs'
-import './app_footer.mjs'
-import './app_header.mjs'
-import './app_footer.mjs'
-import './app_leftbar.mjs'
-import './app_rightbar.mjs'
-import './app_main.mjs'
