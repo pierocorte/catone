@@ -1,8 +1,8 @@
 :root {
-  --bgred: hsl(0 70% 7%);
-  --bggreen: hsl(120, 70%, 7%);
-  --bgblue: hsl(220, 70%, 7%);
-  --bgfuxia: hsl(300, 70%, 7%);
+  --bgred: hsl(0 70% 9%);
+  --bggreen: hsl(120, 70%, 9%);
+  --bgblue: hsl(220, 70%, 9%);
+  --bgfuxia: hsl(300, 70%, 9%);
 }
 
 .gbg {
