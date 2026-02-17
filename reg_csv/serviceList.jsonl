@@ -1,0 +1,4 @@
+{"name":"user-service","url":"http://localhost:3001","status":"on"}
+{"name":"user-service","url":"http://localhost:3002","status":"off"}
+{"name":"user-service","url":"http://localhost:3005","status":"off"}
+{"name":"user-service","url":"http://localhost:3089","status":"off"}

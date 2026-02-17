@@ -1,15 +1,18 @@
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 import cors from "cors";
 import fetch from "node-fetch";
 import { pipeline } from "node:stream/promises";
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000; // Port for the proxy server (AGW)
 
 const isDocker = process.env.DOCKER === "true";
 const BASE_URL = isDocker ? "host.docker.internal" : "localhost";
-const APP_URL = 'localhost:3019'
+const APP_URL = "localhost:3019";
 
+const REG_URL = process.env.REG_URL || `http://${BASE_URL}:3001`;
 // If you need cookies across origins, DON'T use "*" for ACAO.
 // Either strictly allow-list or reflect the origin.
 // const allowedOrigins = new Set([
@@ -37,71 +40,76 @@ app.options("*", cors({ origin: true, credentials: true }));
 // app.get("/", (_req, res) => res.send("Proxy OK"));
 
 function buildTargetUrl(req) {
-    const original = req.originalUrl; // includes query string
-    if (original.startsWith("/lib/")) {
-        // proxy to local service on 3001 keeping path+query
-        return `http://${BASE_URL}:3001/${original.replace(/^\/lib\//, "")}`;
-    }
-    if (original.startsWith("/url/")) {
-        // WARNING: open proxy (security risk). Keep only if you trust callers.
-        return `http://${original.replace(/^\/url\//, "")}`;
-    }
-    if (original.startsWith("/api/")) {
-        // WARNING: open proxy (security risk). Keep only if you trust callers.
-        return `http://${original.replace(/^\/api\//, "")}`;
-    }
-    if (original.startsWith("/")) {
-        // proxy to main frontend
-        return `http://${APP_URL}${original}`;
-    }
-    return null;
+  const original = req.originalUrl; // includes query string
+  if (original.startsWith("/reg/")) {
+    // proxy to registry service on 3001 keeping path+query
+    return `${REG_URL}/${original.replace(/^\/reg\//, "")}`;
+  }
+
+  if (original.startsWith("/lib/")) {
+    // proxy to local service on 3001 keeping path+query
+    return `http://${BASE_URL}:3010/${original.replace(/^\/lib\//, "")}`;
+  }
+  if (original.startsWith("/url/")) {
+    // WARNING: open proxy (security risk). Keep only if you trust callers.
+    return `http://${original.replace(/^\/url\//, "")}`;
+  }
+  if (original.startsWith("/api/")) {
+    // WARNING: open proxy (security risk). Keep only if you trust callers.
+    return `http://${original.replace(/^\/api\//, "")}`;
+  }
+  if (original.startsWith("/")) {
+    // proxy to main frontend
+    return `http://${APP_URL}${original}`;
+  }
+  return null;
 }
 
 app.get("/gping", (_req, res) => res.json({ status: "gpong" }));
 
 // Proxy for ALL methods (GET/POST/PUT/PATCH/DELETE)
 app.all("*", async (req, res) => {
-    const targetUrl = buildTargetUrl(req);
-    if (!targetUrl) return res.status(404).send("Route not handled");
+  const targetUrl = buildTargetUrl(req);
+  if (!targetUrl) return res.status(404).send("Route not handled");
 
-    console.log(`[PROXY] ${req.method} ${req.originalUrl} -> ${targetUrl}`);
+  console.log(`[PROXY] ${req.method} ${req.originalUrl} -> ${targetUrl}`);
 
-    try {
-        // Forward headers (drop hop-by-hop headers)
-        const headers = { ...req.headers };
-        delete headers.host;
-        delete headers.connection;
-        delete headers["content-length"];
+  try {
+    // Forward headers (drop hop-by-hop headers)
+    const headers = { ...req.headers };
+    delete headers.host;
+    delete headers.connection;
+    delete headers["content-length"];
 
-        const upstream = await fetch(targetUrl, {
-            method: req.method,
-            headers,
-            // Only forward body for non-GET/HEAD
-            body: req.method === "GET" || req.method === "HEAD" ? undefined : req,
-        });
+    const upstream = await fetch(targetUrl, {
+      method: req.method,
+      headers,
+      // Only forward body for non-GET/HEAD
+      body: req.method === "GET" || req.method === "HEAD" ? undefined : req,
+    });
 
-        // Forward status
-        res.status(upstream.status);
+    // Forward status
+    res.status(upstream.status);
 
-        // Forward upstream headers (excluding hop-by-hop)
-        upstream.headers.forEach((value, key) => {
-            const k = key.toLowerCase();
-            if (["transfer-encoding", "connection", "keep-alive"].includes(k)) return;
-            res.setHeader(key, value);
-        });
+    // Forward upstream headers (excluding hop-by-hop)
+    upstream.headers.forEach((value, key) => {
+      const k = key.toLowerCase();
+      if (["transfer-encoding", "connection", "keep-alive"].includes(k)) return;
+      res.setHeader(key, value);
+    });
 
-        // Stream response body
-        if (upstream.body) {
-            await pipeline(upstream.body, res);
-        } else {
-            res.end();
-        }
-    } catch (err) {
-        console.error("Proxy error:", err);
-        res.status(502).json({ error: "PROXY_ERROR" });
+    // Stream response body
+    if (upstream.body) {
+      await pipeline(upstream.body, res);
+    } else {
+      res.end();
     }
+  } catch (err) {
+    console.error("Proxy error:", err);
+    res.status(502).json({ error: "PROXY_ERROR" });
+  }
 });
 
 app.listen(port, () => {
-    console.log(`Proxy server running at http://localhost:${port}`);
+  console.log(`Proxy server running at http://localhost:${port}`);
 });
