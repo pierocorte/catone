@@ -1,30 +1,20 @@
-import express from "express";
-import cors from "cors";
-import REG from "./jsonServiceRegistry.js";
+import express, { json } from "express";
+import JSONSERVICE from "./JsonService.js";
+import SERVICES from "./ServiceList.js";
+import Service from "./Service.js";
+
+const FILE_UPDATE_TIMEOUT = 10000;
+const PING_TIMEOUT = 5000;
+
 const app = express();
 app.use(express.json());
 const port = 3001;
 
-// const allowedOrigins = [
-//   'http://localhost:3000'
-// ];
-// const corsOptions = {
-//   origin: function (origin, callback) {
-//     if (!origin || allowedOrigins.includes(origin)) callback(null, true);
-//     else callback(new Error('Not allowed by CORS'));
-//   },
-//   credentials: true // se devi usare cookie o auth
-// };
-// app.use(cors(corsOptions));
+// app.get("/ping", (_req, res) => res.json({ status: "pong" }));
 
-// app.use(cors({ origin: true, credentials: true }));
-// app.options("*", cors({ origin: true, credentials: true }));
-
-app.get("/ping", (_req, res) => res.json({ status: "pong" }));
-
-app.get("/hello", (req, res) => {
-  res.send("Hello from registry!");
-});
+// app.get("/hello", (req, res) => {
+//   res.send("Hello from registry!");
+// });
 
 app.listen(port, () => {
   console.log(`reg_csv is running at http://localhost:${port}`);
@@ -33,13 +23,15 @@ app.listen(port, () => {
 //registra un nuovo srvizio
 app.post("/service", (req, res) => {
   const { name, url } = req.body;
-
   if (!name || !url) {
-    return res.status(400).json({ error: "name and url required" });
+    return res
+      .status(400)
+      .json({ error: "service's name and url are required" });
   }
 
   try {
-    REG.register(req.body);
+    const s = new Service({ name, url });
+    SERVICES.register(s);
     return res.status(201).json({ message: "service registered" });
   } catch (err) {
     return res.status(409).json({ error: err.message });
@@ -49,7 +41,15 @@ app.post("/service", (req, res) => {
 //cancella il servizio
 app.delete("/service", (req, res) => {
   try {
-    REG.unregister(req.body);
+    const { name, url } = req.body;
+    if (!name || !url) {
+      return res
+        .status(400)
+        .json({ error: "service's name and url are required" });
+    }
+
+    const s = new Service({ name, url });
+    SERVICES.unregister(s);
     return res.status(201).json({ message: "service unregistered" });
   } catch (err) {
     return res.status(409).json({ error: err.message });
@@ -57,55 +57,60 @@ app.delete("/service", (req, res) => {
 });
 
 //mi restiuisce tutti i servizi
-app.get("/services", (req, res) => {
+app.get("/service", (req, res) => {
   try {
-    const services = REG.getAll();
+    const services = SERVICES.getAll();
     return res.status(200).json(services);
   } catch (err) {
     res.status(500).send({ error: "failed to fetch", details: err.message });
   }
 });
-//con nome servizio ti restiusice l'ip
-app.get("/service", (req, res) => {
-  const name = req.body;
-
-  const filtered = REG.getAll().filter(
-    (s) => s.name === name && s.status === "on",
-  );
-  if (!filtered) {
+//con nome servizio ti restiusice l'url
+//TODO da modificare
+app.get("/url/:name", (req, res) => {
+  const url = SERVICES.getUrl(req.params.name);
+  if (!url) {
     return res.status(500).json({ message: "no service active found" });
   }
-  return res.status(200).json(filtered[0].url);
+  return res.status(200).json(url);
 });
 
-// modifica lo stato del servizio
-app.patch("/service", (req, res) => {
-  const { name, url, status } = req.body;
+// modifica lo stato del servizio per metterti su off
+app.patch("/service/:url", (req, res) => {
+  const url = req.params.url;
+  const status = req.body.status;
 
-  if (!name || !url || status === undefined) {
-    return res.status(400).json({ error: "name, url are mandatory" });
+  if (status === undefined || url === undefined) {
+    return res.status(400).json({ error: " status and url are mandatory" });
   }
-
+  const s = new Service({ url });
   try {
-    REG.updateStatus({ name, url }, status);
+    SERVICES.changeStatus(s, status);
     res.status(200).json({ message: "status, updated" });
   } catch (err) {
     res.status(400).json({ error: "not updated", details: err.message });
   }
 });
 
+//TODO puo' essere migliorato vedendo se ci sono stati cambiamenti
 setInterval(() => {
-  const services = REG.getAll();
-  services.forEach((e) => {
-    fetch(e.url + "/ping")
+  JSONSERVICE.write(SERVICES.getAll());
+}, FILE_UPDATE_TIMEOUT);
+
+//TODO da cambiare con macro
+setInterval(() => {
+  SERVICES.getAll().forEach((s) => {
+    fetch(`http://localhost:3000/ping/${s.url}`)
       .then((r) => {
-        if (r.ok) {
-          console.log(e.name, "is active");
+        if (!r.ok) {
+          SERVICES.changeStatus(s, "off");
+        } else {
+          SERVICES.changeStatus(s, "on");
         }
       })
       .catch(() => {
-        console.log(e.name, "is down");
-        REG.updateStatus(e, (e.status = "off"));
+        console.log("gateway down");
+        SERVICES.changeStatus(s, "off");
       });
   });
-}, 5000);
+}, PING_TIMEOUT);

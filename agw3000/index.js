@@ -10,7 +10,7 @@ const port = process.env.PORT || 3000; // Port for the proxy server (AGW)
 
 const isDocker = process.env.DOCKER === "true";
 const BASE_URL = isDocker ? "host.docker.internal" : "localhost";
-const APP_URL = "localhost:3019";
+const APP_URL = "localhost:3000";
 
 const REG_URL = process.env.REG_URL || `http://${BASE_URL}:3001`;
 // If you need cookies across origins, DON'T use "*" for ACAO.
@@ -41,9 +41,9 @@ app.options("*", cors({ origin: true, credentials: true }));
 
 function buildTargetUrl(req) {
   const original = req.originalUrl; // includes query string
-  if (original.startsWith("/reg/")) {
+  if (original.startsWith("/reg_csv/")) {
     // proxy to registry service on 3001 keeping path+query
-    return `${REG_URL}/${original.replace(/^\/reg\//, "")}`;
+    return `${REG_URL}/${original.replace(/^\/reg_csv\//, "")}`;
   }
 
   if (original.startsWith("/lib/")) {
@@ -58,10 +58,16 @@ function buildTargetUrl(req) {
     // WARNING: open proxy (security risk). Keep only if you trust callers.
     return `http://${original.replace(/^\/api\//, "")}`;
   }
+  if (original.startsWith("/ping/")) {
+    const target = `http://${original.replace(/^\/ping\//, "")}`;
+    return `${target}/ping`;
+  }
+
   if (original.startsWith("/")) {
     // proxy to main frontend
     return `http://${APP_URL}${original}`;
   }
+
   return null;
 }
 
@@ -72,7 +78,7 @@ app.all("*", async (req, res) => {
   const targetUrl = buildTargetUrl(req);
   if (!targetUrl) return res.status(404).send("Route not handled");
 
-  console.log(`[PROXY] ${req.method} ${req.originalUrl} -> ${targetUrl}`);
+  //console.log(`[PROXY] ${req.method} ${req.originalUrl} -> ${targetUrl}`);
 
   try {
     // Forward headers (drop hop-by-hop headers)

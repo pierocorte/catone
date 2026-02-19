@@ -1,0 +1,33 @@
+:root {
+  --bgred: hsl(0 70% 9%);
+  --bggreen: hsl(120, 70%, 9%);
+  --bgblue: hsl(220, 70%, 9%);
+  --bgfuxia: hsl(300, 70%, 9%);
+}
+
+.gbg {
+  background:
+    radial-gradient(circle at 25% 30%, var(--bgred), transparent 50%),
+    radial-gradient(circle at 75% 30%, var(--bggreen), transparent 50%),
+    radial-gradient(circle at 25% 70%, var(--bgblue), transparent 50%),
+    radial-gradient(circle at 75% 70%, var(--bgfuxia), transparent 50%),
+    black;
+  color: white;
+}
+
+.glass {
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.58);
+  background: rgba(180, 220, 250, 0.1);
+}
+
+.glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: rgba(180, 220, 250, 0.1);
+  backdrop-filter: blur(18px);
+  z-index: -1;
+  border-radius: inherit;
+}
