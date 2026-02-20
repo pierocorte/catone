@@ -16,6 +16,9 @@ const port = 3001;
 //   res.send("Hello from registry!");
 // });
 
+const services = JSONSERVICE.getAll();
+services.forEach((s) => SERVICES.register(s));
+
 app.listen(port, () => {
   console.log(`reg_csv is running at http://localhost:${port}`);
 });
@@ -32,6 +35,7 @@ app.post("/service", (req, res) => {
   try {
     const s = new Service({ name, url });
     SERVICES.register(s);
+    JSONSERVICE.write(SERVICES.getAll());
     return res.status(201).json({ message: "service registered" });
   } catch (err) {
     return res.status(409).json({ error: err.message });
@@ -50,6 +54,8 @@ app.delete("/service", (req, res) => {
 
     const s = new Service({ name, url });
     SERVICES.unregister(s);
+    JSONSERVICE.write(SERVICES.getAll());
+
     return res.status(201).json({ message: "service unregistered" });
   } catch (err) {
     return res.status(409).json({ error: err.message });
@@ -86,6 +92,8 @@ app.patch("/service/:url", (req, res) => {
   const s = new Service({ url });
   try {
     SERVICES.changeStatus(s, status);
+    JSONSERVICE.write(SERVICES.getAll());
+
     res.status(200).json({ message: "status, updated" });
   } catch (err) {
     res.status(400).json({ error: "not updated", details: err.message });
@@ -93,14 +101,14 @@ app.patch("/service/:url", (req, res) => {
 });
 
 //TODO puo' essere migliorato vedendo se ci sono stati cambiamenti
-setInterval(() => {
-  JSONSERVICE.write(SERVICES.getAll());
-}, FILE_UPDATE_TIMEOUT);
+// setInterval(() => {
+//   JSONSERVICE.write(SERVICES.getAll());
+// }, FILE_UPDATE_TIMEOUT);
 
 //TODO da cambiare con macro
 setInterval(() => {
   SERVICES.getAll().forEach((s) => {
-    fetch(`http://localhost:3000/ping/${s.url}`)
+    fetch(`http://localhost:3000/ip/${s.url}`)
       .then((r) => {
         if (!r.ok) {
           SERVICES.changeStatus(s, "off");
