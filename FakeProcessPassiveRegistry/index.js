@@ -1,4 +1,4 @@
-import express from "express";
+import express, { json } from "express";
 import cors from "cors";
 
 const app = express();
@@ -46,17 +46,17 @@ async function registerService() {
 }
 
 async function sendHeartBeat() {
-  try {
-    const res = await fetch(
-      `http://localhost:3000/reg_csv/service/${serviceName}/heartbeat`,
-      {
-        method: "PUT",
+  const res = await fetch(
+    `http://localhost:3000/reg_csv/service/${serviceName}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
       },
-    );
-    return res.ok;
-  } catch (err) {
-    res.status(502).json({ error: "PROXY_ERROR" });
-  }
+      body: JSON.stringify({ status: "on" }),
+    },
+  );
+  return res.ok;
 }
 
 // register and send heartbeat
@@ -68,6 +68,7 @@ setInterval(async () => {
   }
   if (logged) {
     logged = await sendHeartBeat();
+
     console.log("i'm registered,sending an heartbeat...");
   }
 }, 5000);
