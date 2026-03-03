@@ -58,10 +58,24 @@ function buildTargetUrl(req) {
     // WARNING: open proxy (security risk). Keep only if you trust callers.
     return `http://${original.replace(/^\/api\//, "")}`;
   }
-  if (original.startsWith("/ping/")) {
-    const target = `http://${original.replace(/^\/ping\//, "")}`;
-    return `${target}/ping`;
+  if (original.startsWith("/ip/")) {
+    const target = `http://${original.replace(/^\/ip\//, "")}`;
+    return `${target}`;
   }
+  // const parts = original.split("/");
+  // //ping manager /service
+  // if (parts[2] === "ping") {
+  //   const target = `${REG_URL}/url/${parts[1]}`;
+  //   const r = await fetch(target);
+  //   const url = await r.json();
+  //   return `http://${url}/ping`;
+  // }
+  // if (parts[2] === "disturb") {
+  //   const target = `${REG_URL}/url/${parts[1]}`;
+  //   const r = await fetch(target);
+  //   const url = await r.json();
+  //   return `http://${url}/disturb`;
+  // }
 
   if (original.startsWith("/")) {
     // proxy to main frontend
@@ -75,11 +89,11 @@ app.get("/gping", (_req, res) => res.json({ status: "gpong" }));
 
 // Proxy for ALL methods (GET/POST/PUT/PATCH/DELETE)
 app.all("*", async (req, res) => {
-  const targetUrl = buildTargetUrl(req);
+  let targetUrl = await buildTargetUrl(req);
   if (!targetUrl) return res.status(404).send("Route not handled");
-
   //console.log(`[PROXY] ${req.method} ${req.originalUrl} -> ${targetUrl}`);
-
+  targetUrl = await resolveEndPoint(targetUrl);
+  console.log(targetUrl);
   try {
     // Forward headers (drop hop-by-hop headers)
     const headers = { ...req.headers };
@@ -119,3 +133,8 @@ app.all("*", async (req, res) => {
 app.listen(port, () => {
   console.log(`Proxy server running at http://localhost:${port}`);
 });
+
+function resolveEndPoint(targetUrl) {
+  const serviceName = targetUrl.split("/")[2];
+  return fetch(REG_URL + "/url/" + serviceName);
+}

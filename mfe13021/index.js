@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 
 const app = express();
-const port = 3021;
+const port = 3022;
 
 // const allowedOrigins = [
 //   'http://localhost:3000'

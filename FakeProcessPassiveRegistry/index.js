@@ -2,7 +2,7 @@ import express, { json } from "express";
 import cors from "cors";
 
 const app = express();
-const port = 3020;
+const port = 3011;
 const serviceName = "fake-service";
 // const allowedOrigins = [
 //   'http://localhost:3000'

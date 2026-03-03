@@ -1,0 +1,126 @@
+@import url('./glass.css');
+
+@font-face {
+    font-family: 'Montserrat';
+    src: url('/assets/fonts/Montserrat.ttf');
+}
+
+@font-face {
+    font-family: 'SymbolsRounded';
+    src: url('/assets/fonts/SymbolsRounded.ttf');
+}
+
+body {
+    box-sizing: border-box;
+    margin: 0;
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+
+    --font-size: 16px;
+    --font-family: Montserrat, Helvetica, sans-serif;
+    --bgc: hsl(0, 0%, 100%);
+    --fgc: hsl(0, 0%, 0%);
+    --bdc: hsl(0, 0%, 70%);
+    --btn-bgc: hsl(210, 100%, 50%);
+    --btn-fgc: hsl(0, 0%, 100%);
+    --btn-hlc: hsl(210, 100%, 60%);
+    --btn-disc: hsl(0, 0%, 80%);
+    --mnu-bgc: hsl(0, 0%, 90%);
+    --mnu-fgc: hsl(0, 0%, 0%);
+    --mnu-hlc: hsl(218, 92%, 70%);
+    --mnu-hsc: hsl(0, 0%, 60%);
+    --shadow: 0 6px 18px hsla(0, 0%, 0%, .2);
+
+    font-size: var(--font-size);
+    font-family: var(--font-family);
+
+}
+
+pc-app {
+    box-sizing: border-box;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+}
+
+pc-panel {
+    box-sizing: border-box;
+    display: block;
+    width: 30%;
+    height: 20%;
+    border-radius: 1em;
+    padding: 1em;
+}
+
+h1,
+h2 {
+    all: unset;
+    display: block;
+}
+
+h1 {
+    font-size: 1.5em;
+}
+
+h2 {
+    font-size: .9em;
+    font-style: italic;
+    color: hsla(0, 0%, 100%, .7);
+}
+
+ol {
+    margin-bottom: 1em;
+}
+
+
+
+pannello,
+bottone {
+    position: relative;
+    display: block;
+    width: 27em;
+    height: 18em;
+    padding: 1em;
+    z-index: 1;
+    border-radius: .5em;
+}
+
+bottone {
+    width: fit-content;
+    height: fit-content;
+    padding: .5em 1em;
+    border-radius: .5em;
+    user-select: none;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    cursor: pointer;
+}
+
+bottone:active {
+    transform: scale(0.98);
+    background: rgba(180, 220, 250, 0.2);
+}
+
+cerchio {
+    display: block;
+    width: 9em;
+    height: 9em;
+    border-radius: 50%;
+    background-color: green;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+cerchio:nth-of-type(2) {
+    background-color: red;
+    top: 35%;
+    left: 20%;
+}
