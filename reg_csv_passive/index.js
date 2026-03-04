@@ -14,6 +14,8 @@ app.listen(port, () => {
   console.log(`reg_csv is running at http://localhost:${port}`);
 });
 
+app.get("/ping", (_req, res) => res.json({ status: "pong" }));
+
 //registra un nuovo srvizio
 app.post("/service", (req, res) => {
   const { name, url } = req.body;

@@ -24,7 +24,7 @@ export class PiCoWin extends PiCoContainer {
                 --overflow: hidden;
                 box-shadow: 0 0 5px rgba(0,0,0,.25);
                 --padding: .2em;
-                background-color: hsla(0,0%,70%,.5);
+                background-color: hsla(0,0%,10%,.5);
             }
             titlebar {
                 box-sizing: border-box;
@@ -54,7 +54,7 @@ export class PiCoWin extends PiCoContainer {
             pc-icon::part(icon) {
                 position: relative;
                 color: black;
-                font-size: .6em;
+                font-size: .7em;
             }
             [name=close] {
                 background-color: #EC6A5E;
@@ -72,7 +72,6 @@ export class PiCoWin extends PiCoContainer {
                 box-sizing: border-box;
                 display: block;
                 position: relative;
-                background-color: hsla(0,0%,70%,.9);
                 width: 100%;
                 height: 100%;
                 overflow: scroll;
@@ -92,20 +91,12 @@ export class PiCoWin extends PiCoContainer {
 
             .glass {
                 position: relative;
-                border: 1px solid rgba(255, 255, 255, 0.58);
-                background: rgba(180, 220, 250, 0.1);
+                --border: 1px solid rgba(255, 255, 255, 0.58);
+                --background: rgba(180, 220, 250, 0.3);
+                background: hsla(200, 20%, 20%, .8);
+
             }
 
-            .glass::before {
-                content: "";
-                position: absolute;
-                inset: 0;
-                display: block;
-                background: rgba(180, 220, 250, 0.1);
-                backdrop-filter: blur(18px);
-                z-index: -1;
-                border-radius: inherit;
-            }
         `
     }
 
@@ -122,7 +113,7 @@ export class PiCoWin extends PiCoContainer {
                     <pc-icon id="scroll" name="expansion_panels" weight="500"></pc-icon>
                 </cntr>
             </titlebar>
-            <viewport part="viewport">
+            <viewport part="viewport" class="glass">
                 ${super.htm()}
             </viewport>
             <resize></resize>

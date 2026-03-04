@@ -10,7 +10,7 @@ const port = process.env.PORT || 3000; // Port for the proxy server (AGW)
 
 const isDocker = process.env.DOCKER === "true";
 const BASE_URL = isDocker ? "host.docker.internal" : "localhost";
-const APP_URL = "localhost:3000";
+const APP_URL = "localhost:3010";
 
 const REG_URL = process.env.REG_URL || `http://${BASE_URL}:3001`;
 // If you need cookies across origins, DON'T use "*" for ACAO.
@@ -39,12 +39,55 @@ app.options("*", cors({ origin: true, credentials: true }));
 // Root (optional)
 // app.get("/", (_req, res) => res.send("Proxy OK"));
 
+
+app.use((req, res, next) => {
+  const ora = new Date().toISOString();
+  const metodo = req.method;
+  const url = req.url;
+  console.log(`1. [${ora}] Ricevuta richiesta: ${metodo} su ${url}`);
+  // Fondamentale: chiamiamo next() per passare il controllo al gestore successivo.
+  // Senza questo, la richiesta rimarrebbe "appesa".
+  next();
+});
+
+app.get("/gping", (_req, res) => res.json({ status: "gpong" }));
+
+// app.all("/REG", (_req, res) => {
+//   console.log(_req.method)
+//   fetch(REG_URL + "/ping", {
+//     method: _req.method,
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: _req.body
+//   }).then(async (r) => {
+//     const rs = await r.json();
+//     console.log(rs);
+//     return res.status(200).json({ status: "pong" });
+//   })
+// })
+
+app.use((req, res, next) => {
+  const ora = new Date().toISOString();
+  const metodo = req.method;
+  const url = req.url;
+
+  console.log(`2. [${ora}] Ricevuta richiesta: ${metodo} su ${url}`);
+
+  // Fondamentale: chiamiamo next() per passare il controllo al gestore successivo.
+  // Senza questo, la richiesta rimarrebbe "appesa".
+  next();
+});
+
+
 function buildTargetUrl(req) {
   const original = req.originalUrl; // includes query string
-  if (original.startsWith("/reg_csv/")) {
+  console.log('ORIGINAL', original)
+  if (original.startsWith("/REG/")) {
     // proxy to registry service on 3001 keeping path+query
-    return `${REG_URL}/${original.replace(/^\/reg_csv\//, "")}`;
+    return `${REG_URL}/${original.replace(/^\/REG\//, "")}`;
   }
+
 
   if (original.startsWith("/lib/")) {
     // proxy to local service on 3001 keeping path+query
@@ -62,38 +105,26 @@ function buildTargetUrl(req) {
     const target = `http://${original.replace(/^\/ip\//, "")}`;
     return `${target}`;
   }
-  // const parts = original.split("/");
-  // //ping manager /service
-  // if (parts[2] === "ping") {
-  //   const target = `${REG_URL}/url/${parts[1]}`;
-  //   const r = await fetch(target);
-  //   const url = await r.json();
-  //   return `http://${url}/ping`;
-  // }
-  // if (parts[2] === "disturb") {
-  //   const target = `${REG_URL}/url/${parts[1]}`;
-  //   const r = await fetch(target);
-  //   const url = await r.json();
-  //   return `http://${url}/disturb`;
-  // }
+
+  return null
 
   if (original.startsWith("/")) {
     // proxy to main frontend
     return `http://${APP_URL}${original}`;
   }
-
   return null;
 }
 
-app.get("/gping", (_req, res) => res.json({ status: "gpong" }));
+
+
 
 // Proxy for ALL methods (GET/POST/PUT/PATCH/DELETE)
 app.all("*", async (req, res) => {
-  let targetUrl = await buildTargetUrl(req);
+  let targetUrl = buildTargetUrl(req);
   if (!targetUrl) return res.status(404).send("Route not handled");
   //console.log(`[PROXY] ${req.method} ${req.originalUrl} -> ${targetUrl}`);
-  targetUrl = await resolveEndPoint(targetUrl);
   console.log(targetUrl);
+
   try {
     // Forward headers (drop hop-by-hop headers)
     const headers = { ...req.headers };
