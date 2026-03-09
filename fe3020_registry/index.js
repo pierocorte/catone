@@ -2,8 +2,9 @@ import express from "express";
 import cors from "cors";
 
 const app = express();
-const port = 3020;
+const PORT = 3020;
 const SERVICE_NAME = "myself";
+const TIME = 600 * 1000;
 
 // const allowedOrigins = [
 //   'http://localhost:3000'
@@ -28,40 +29,38 @@ app.get("/hello", (req, res) => {
   res.send(`hello from ${SERVICE_NAME}`);
 });
 
+app.listen(PORT, () => {
+  console.log(`${SERVICE_NAME} is running at http://localhost:${PORT}`);
+});
+
 async function registerService() {
-  try {
-    const res = await fetch("http://localhost:3000/reg_csv/service", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: SERVICE_NAME,
-        url: `localhost:${port}`,
-      }),
-    });
-    return res.ok;
-  } catch (err) {
-    res.status(502).json({ error: "PROXY_ERROR" });
-  }
+  const res = await fetch("http://localhost:3000/reg/service", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      name: SERVICE_NAME,
+      url: `localhost:${PORT}`,
+    }),
+  });
+  return res.ok;
 }
 
 async function sendHeartBeat() {
-  const res = await fetch(
-    `http://localhost:3000/reg_csv/service/${SERVICE_NAME}`,
-    {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ status: "on" }),
+  const res = await fetch(`http://localhost:3000/reg/service/${SERVICE_NAME}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
     },
-  );
+    body: JSON.stringify({ status: "on" }),
+  });
   return res.ok;
 }
 
 // register and send heartbeat
-let logged = false;
+// let logged = false;
+let logged = registerService();
 setInterval(async () => {
   if (!logged) {
     logged = await registerService();
@@ -72,8 +71,4 @@ setInterval(async () => {
 
     console.log("i'm registered,sending an heartbeat...");
   }
-}, 5000);
-
-app.listen(port, () => {
-  console.log(`mainfe is running at http://localhost:${port}`);
-});
+}, TIME);

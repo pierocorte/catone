@@ -42,7 +42,7 @@ export class ServiceList {
   }
 
   getUrl(serviceName) {
-    return this.services.find((s) => s.name === serviceName).url;
+    return this.services.find((s) => s.name === serviceName)?.url;
   }
 
   getAll() {

@@ -3,7 +3,7 @@ import JSONSERVICE from "./JsonService.js";
 import SERVICES from "./ServiceList.js";
 import Service from "./Service.js";
 
-const TIMEOUT = 5000;
+const TIMEOUT = 6000000;
 const KICK_OUT_TIMEOUT = 10000;
 
 const app = express();
@@ -14,7 +14,7 @@ app.listen(port, () => {
   console.log(`reg_csv is running at http://localhost:${port}`);
 });
 
-app.get("/ping", (_req, res) => res.json({ status: "pong" }));
+app.get("/ping", (_req, res) => res.json({ status: "pong by REG" }));
 
 //registra un nuovo srvizio
 app.post("/service", (req, res) => {
@@ -67,9 +67,9 @@ app.get("/service", (req, res) => {
 app.get("/url/:name", (req, res) => {
   const url = SERVICES.getUrl(req.params.name);
   if (!url) {
-    return res.status(500).json({ message: "no service active found" });
+    return res.status(404).json({ message: "no service active found" });
   }
-  return res.status(200).json(url);
+  return res.status(200).send({ service: req.params.name, url: url });
 });
 
 app.patch("/service/:name", (req, res) => {
@@ -103,9 +103,9 @@ setInterval(() => {
   SERVICES.getAll().forEach((s) => {
     if (globalClock - s.heartBeat > TIMEOUT) {
       SERVICES.changeStatus(s.name, "off");
-      if (globalClock - s.heartBeat > KICK_OUT_TIMEOUT) {
-        SERVICES.unregister(s);
-      }
+      //   if (globalClock - s.heartBeat > KICK_OUT_TIMEOUT) {
+      //     SERVICES.unregister(s);
+      //   }
     } else {
       SERVICES.changeStatus(s.name, "on");
     }

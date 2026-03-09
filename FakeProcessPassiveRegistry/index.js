@@ -29,7 +29,7 @@ app.listen(port, () => {
 
 async function registerService() {
   try {
-    const res = await fetch("http://localhost:3000/reg_csv/service", {
+    const res = await fetch("http://localhost:3000/REG/service", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -46,16 +46,13 @@ async function registerService() {
 }
 
 async function sendHeartBeat() {
-  const res = await fetch(
-    `http://localhost:3000/reg_csv/service/${serviceName}`,
-    {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ status: "on" }),
+  const res = await fetch(`http://localhost:3000/REG/service/${serviceName}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
     },
-  );
+    body: JSON.stringify({ status: "on" }),
+  });
   return res.ok;
 }
 
