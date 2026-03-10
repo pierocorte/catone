@@ -36,18 +36,13 @@ app.post("/service", (req, res) => {
 });
 
 //cancella il servizio
-app.delete("/service", (req, res) => {
+app.delete("/service/:sName", (req, res) => {
+  const { sName } = req.params;
   try {
-    const { name, url } = req.body;
-    if (!name || !url) {
-      return res
-        .status(400)
-        .json({ error: "service's name and url are required" });
+    if (!sName) {
+      return res.status(400).json({ error: "service's url is required" });
     }
-
-    const s = new Service({ name, url });
-    SERVICES.unregister(s);
-
+    SERVICES.unregister(sName);
     return res.status(201).json({ message: "service unregistered" });
   } catch (err) {
     return res.status(409).json({ error: err.message });

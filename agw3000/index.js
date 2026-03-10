@@ -36,12 +36,11 @@ const APP_URL = "localhost:3020";
 // app.use(cors({ origin: true, credentials: true }));
 // app.options("*", cors({ origin: true, credentials: true }));
 
-
 app.use((req, res, next) => {
   const ora = new Date().toISOString();
   const metodo = req.method;
   const url = req.url;
-  console.log(`1. [${ora}] Ricevuta richiesta: ${metodo} su ${url}`);
+  console.log(`1. [${ora}] Ricevuta richiesta:da ${metodo} su ${url}`);
   next();
 });
 

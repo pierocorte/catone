@@ -26,10 +26,6 @@ app.get("/ping", (_req, res) => {
   res.json({ status: "pong" });
 });
 
-app.get("/disturb", (req, res) => {
-  // sleep(2000).then(() => res.json({ status: "you're welcome!" }));
-});
-
 app.listen(PORT, () => {
   console.log(`${SERVICE_NAME} is running at http://localhost:${PORT}`);
 });
@@ -48,9 +44,12 @@ async function registerService() {
   return res.ok;
 }
 
-// function sleep(ms) {
-//   return new Promise((resolve) => setTimeout(resolve, ms));
-// }
+async function unregisterService() {
+  const res = await fetch(`http://localhost:3000/reg/service/${SERVICE_NAME}`, {
+    method: "DELETE",
+  });
+  return res.ok;
+}
 
 async function sendHeartBeat() {
   const res = await fetch(`http://localhost:3000/reg/service/${SERVICE_NAME}`, {
@@ -63,18 +62,29 @@ async function sendHeartBeat() {
   return res.ok;
 }
 
-// register and send heartbeat
-let logged = false;
+let logged = registerService();
 setInterval(async () => {
-  console.log('HEARTBEAT')
+  console.log("HEARTBEAT");
   if (!logged) {
     console.log("trying to be registed", logged);
     logged = await registerService();
-    console.log('LOGGED', logged)
+    console.log("LOGGED", logged);
   }
   if (logged) {
     console.log("i'm registered,sending an heartbeat...", logged);
     logged = await sendHeartBeat();
-    console.log('LOGGED', logged)
   }
 }, TIME);
+
+async function shutdown() {
+  try {
+    console.log("shutdown...");
+    await unregisterService();
+  } catch (err) {
+    process.exit(1);
+  }
+  process.exit(0);
+}
+
+process.on("SIGINT", () => shutdown());
+process.on("SIGTERM", () => shutdown());

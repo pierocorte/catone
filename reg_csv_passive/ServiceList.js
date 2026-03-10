@@ -16,13 +16,13 @@ export class ServiceList {
     this.services.push(service);
   }
 
-  unregister(service) {
-    const index = this.services.findIndex(
-      (s) => s.name === service.name && s.url === service.url,
-    );
-    if (index == -1) {
-      throw new Error("element not Found");
+  unregister(serviceName) {
+    const index = this.services.findIndex((s) => s.name === serviceName);
+
+    if (index === -1) {
+      throw new Error("Service not found");
     }
+
     this.services.splice(index, 1);
   }
 
