@@ -44,8 +44,6 @@ app.use((req, res, next) => {
   const metodo = req.method;
   const url = req.url;
   console.log(`1. [${ora}] Ricevuta richiesta: ${metodo} su ${url}`);
-  // Fondamentale: chiamiamo next() per passare il controllo al gestore successivo.
-  // Senza questo, la richiesta rimarrebbe "appesa".
   next();
 });
 
@@ -58,8 +56,6 @@ app.use((req, res, next) => {
 
   console.log(`2. [${ora}] Ricevuta richiesta: ${metodo} su ${url}`);
 
-  // Fondamentale: chiamiamo next() per passare il controllo al gestore successivo.
-  // Senza questo, la richiesta rimarrebbe "appesa".
   next();
 });
 
@@ -161,9 +157,7 @@ app.all("/lib/*", async (req, res) => {
 app.all("*", async (req, res) => {
   const targetUrl = buildTargetUrl(req);
   if (!targetUrl) return res.status(404).send("Route not handled");
-  //console.log(`[PROXY] ${req.method} ${req.originalUrl} -> ${targetUrl}`);
   try {
-    // Forward headers (drop hop-by-hop headers)
     const headers = { ...req.headers };
     delete headers.host;
     delete headers.connection;
@@ -172,23 +166,15 @@ app.all("*", async (req, res) => {
     const upstream = await fetch(targetUrl, {
       method: req.method,
       headers,
-      // Only forward body for non-GET/HEAD
       body: req.method === "GET" || req.method === "HEAD" ? undefined : req,
     });
-    // const data = await upstream.json(); // leggi UNA volta
-
-    // console.log("questa è la risposta:", data.url);
-
-    // Forward status
     res.status(upstream.status);
-    // Forward upstream headers (excluding hop-by-hop)
     upstream.headers.forEach((value, key) => {
       const k = key.toLowerCase();
       if (["transfer-encoding", "connection", "keep-alive"].includes(k)) return;
       res.setHeader(key, value);
     });
 
-    // Stream response body
     if (upstream.body) {
       await pipeline(upstream.body, res);
     } else {
