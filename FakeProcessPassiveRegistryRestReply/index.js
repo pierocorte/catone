@@ -2,9 +2,9 @@ import express, { json } from "express";
 import cors from "cors";
 
 const app = express();
-const port = 3012;
-const serviceName = "fake-service2";
-const TIME = 600 * 1000;
+const PORT = 3012;
+const SERVICE_NAME = "fake-service2";
+const TIME = 10 * 1000;
 
 // const allowedOrigins = [
 //   'http://localhost:3000'
@@ -30,8 +30,8 @@ app.get("/disturb", (req, res) => {
   // sleep(2000).then(() => res.json({ status: "you're welcome!" }));
 });
 
-app.listen(port, () => {
-  console.log(`${serviceName} is running at http://localhost:${port}`);
+app.listen(PORT, () => {
+  console.log(`${SERVICE_NAME} is running at http://localhost:${PORT}`);
 });
 
 async function registerService() {
@@ -41,8 +41,8 @@ async function registerService() {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      name: serviceName,
-      url: `localhost:${port}`,
+      name: SERVICE_NAME,
+      url: `localhost:${PORT}`,
     }),
   });
   return res.ok;
@@ -53,7 +53,7 @@ async function registerService() {
 // }
 
 async function sendHeartBeat() {
-  const res = await fetch(`http://localhost:3000/REG/service/${serviceName}`, {
+  const res = await fetch(`http://localhost:3000/reg/service/${SERVICE_NAME}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -64,16 +64,17 @@ async function sendHeartBeat() {
 }
 
 // register and send heartbeat
-// let logged = false;
-let logged = registerService();
+let logged = false;
 setInterval(async () => {
+  console.log('HEARTBEAT')
   if (!logged) {
+    console.log("trying to be registed", logged);
     logged = await registerService();
-    console.log("trying to be registed");
+    console.log('LOGGED', logged)
   }
   if (logged) {
+    console.log("i'm registered,sending an heartbeat...", logged);
     logged = await sendHeartBeat();
-
-    console.log("i'm registered,sending an heartbeat...");
+    console.log('LOGGED', logged)
   }
 }, TIME);

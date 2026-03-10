@@ -4,7 +4,7 @@ import cors from "cors";
 const app = express();
 const PORT = 3020;
 const SERVICE_NAME = "myself";
-const TIME = 600 * 1000;
+const TIME = 10 * 1000;
 
 // const allowedOrigins = [
 //   'http://localhost:3000'
@@ -59,8 +59,7 @@ async function sendHeartBeat() {
 }
 
 // register and send heartbeat
-// let logged = false;
-let logged = registerService();
+let logged = false;
 setInterval(async () => {
   if (!logged) {
     logged = await registerService();

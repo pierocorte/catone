@@ -3,8 +3,8 @@ import JSONSERVICE from "./JsonService.js";
 import SERVICES from "./ServiceList.js";
 import Service from "./Service.js";
 
-const TIMEOUT = 6000000;
-const KICK_OUT_TIMEOUT = 10000;
+const TIMEOUT = 12000;
+const KICK_OUT_TIMEOUT = 36000;
 
 const app = express();
 app.use(express.json());
@@ -16,7 +16,7 @@ app.listen(port, () => {
 
 app.get("/ping", (_req, res) => res.json({ status: "pong by REG" }));
 
-//registra un nuovo srvizio
+//registra un nuovo servizio
 app.post("/service", (req, res) => {
   const { name, url } = req.body;
   const heartBeat = Date.now();
@@ -103,9 +103,9 @@ setInterval(() => {
   SERVICES.getAll().forEach((s) => {
     if (globalClock - s.heartBeat > TIMEOUT) {
       SERVICES.changeStatus(s.name, "off");
-      //   if (globalClock - s.heartBeat > KICK_OUT_TIMEOUT) {
-      //     SERVICES.unregister(s);
-      //   }
+      if (globalClock - s.heartBeat > KICK_OUT_TIMEOUT) {
+        SERVICES.unregister(s);
+      }
     } else {
       SERVICES.changeStatus(s.name, "on");
     }
