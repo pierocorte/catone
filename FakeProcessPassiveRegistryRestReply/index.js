@@ -31,35 +31,47 @@ app.listen(PORT, () => {
 });
 
 async function registerService() {
-  const res = await fetch("http://localhost:3000/reg/service", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      name: SERVICE_NAME,
-      url: `localhost:${PORT}`,
-    }),
-  });
-  return res.ok;
+  try {
+    const res = await fetch("http://localhost:3000/reg/service", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: SERVICE_NAME,
+        url: `localhost:${PORT}`,
+      }),
+    });
+    return res.ok;
+  } catch (err) {
+    return false;
+  }
 }
 
 async function unregisterService() {
-  const res = await fetch(`http://localhost:3000/reg/service/${SERVICE_NAME}`, {
-    method: "DELETE",
-  });
-  return res.ok;
+  try {
+    const res = await fetch(`http://localhost:3000/reg/service/${SERVICE_NAME}`, {
+      method: "DELETE",
+    });
+    return res.ok;
+  } catch (err) {
+    return false;
+  }
 }
 
 async function sendHeartBeat() {
-  const res = await fetch(`http://localhost:3000/reg/service/${SERVICE_NAME}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ status: "on" }),
-  });
-  return res.ok;
+  try {
+    const res = await fetch(`http://localhost:3000/reg/service/${SERVICE_NAME}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status: "on" }),
+    });
+    return res.ok;
+  } catch (err) {
+    return false;
+  }
 }
 
 let logged = registerService();
