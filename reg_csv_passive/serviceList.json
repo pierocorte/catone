@@ -1,14 +1,8 @@
 [
   {
-    "name": "myself",
-    "url": "localhost:3020",
-    "status": "on",
-    "heartBeat": 1773222714890
-  },
-  {
     "name": "fake-service2",
     "url": "localhost:3012",
     "status": "on",
-    "heartBeat": 1773222714900
+    "heartBeat": 1773392526428
   }
 ]

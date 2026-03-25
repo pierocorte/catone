@@ -50,9 +50,12 @@ async function registerService() {
 
 async function unregisterService() {
   try {
-    const res = await fetch(`http://localhost:3000/reg/service/${SERVICE_NAME}`, {
-      method: "DELETE",
-    });
+    const res = await fetch(
+      `http://localhost:3000/reg/service/${SERVICE_NAME}`,
+      {
+        method: "DELETE",
+      },
+    );
     return res.ok;
   } catch (err) {
     return false;
@@ -61,13 +64,16 @@ async function unregisterService() {
 
 async function sendHeartBeat() {
   try {
-    const res = await fetch(`http://localhost:3000/reg/service/${SERVICE_NAME}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
+    const res = await fetch(
+      `http://localhost:3000/reg/service/${SERVICE_NAME}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: "on" }),
       },
-      body: JSON.stringify({ status: "on" }),
-    });
+    );
     return res.ok;
   } catch (err) {
     return false;

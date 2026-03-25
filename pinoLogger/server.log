@@ -1,0 +1,5 @@
+{"level":"INFO","timestamp":"2026-03-13T09:01:36.439Z","method":"POST","url":"/reg/service","id":"2"}
+{"level":"INFO","timestamp":"2026-03-13T09:01:36.479Z","method":"PATCH","url":"/reg/service/fake-service2","id":"2"}
+{"level":"INFO","timestamp":"2026-03-13T09:01:46.410Z","method":"PATCH","url":"/reg/service/fake-service2","id":"2"}
+{"level":"INFO","timestamp":"2026-03-13T09:01:56.412Z","method":"PATCH","url":"/reg/service/fake-service2","id":"2"}
+{"level":"INFO","timestamp":"2026-03-13T09:02:06.427Z","method":"PATCH","url":"/reg/service/fake-service2","id":"2"}
