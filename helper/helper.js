@@ -39,6 +39,7 @@ export class Helper {
         url: `localhost:${this.port}`,
       }),
     });
+    console.log("i'm registered");
   }
 
   async setOn() {
@@ -51,6 +52,7 @@ export class Helper {
         status: "on",
       }),
     });
+    console.log("i'm on");
   }
 
   async setOff() {
@@ -63,6 +65,7 @@ export class Helper {
         status: "off",
       }),
     });
+    console.log("i'm off");
   }
 
   async shutdown() {
@@ -72,6 +75,8 @@ export class Helper {
         "Content-Type": "application/json",
       },
     });
+    console.log("i'm quitting...");
+
     this.server.close(() => process.exit(0));
   }
 }
