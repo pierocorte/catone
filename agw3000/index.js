@@ -42,9 +42,9 @@ app.use((req, res, next) => {
   const metodo = req.method;
   const url = req.url;
   console.log(`1. [${ora}] Ricevuta richiesta:da ${metodo} su ${url}`);
-  req.id = 2;
-  let targetUrl = `${PINO_LOGGER}${req.originalUrl}`;
-  handleRequest(req, res, targetUrl);
+  let targetUrl = `${req.originalUrl}`;
+  // let targetUrl = `${PINO_LOGGER}${req.originalUrl}`;
+  //handleRequest(req, res, targetUrl);
   next();
 });
 
@@ -90,7 +90,6 @@ async function handleRequest(req, res, targetUrl) {
     delete headers.host;
     delete headers.connection;
     delete headers["content-length"];
-
     const upstream = await fetch(targetUrl, {
       method: req.method,
       headers,
