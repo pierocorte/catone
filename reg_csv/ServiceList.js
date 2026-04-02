@@ -7,30 +7,36 @@ export class ServiceList {
   }
 
   register(name, url) {
-    let nameUsed = false;
-    let urlUsed = false;
+    const sameService = this.services.find(
+      (s) => s.name === name && s.url === url,
+    );
 
-    this.services.forEach((s) => {
-      if (s.name === name) nameUsed = true;
-      if (s.url === url) urlUsed = true;
-    });
-
-    if (nameUsed && urlUsed) {
-      throw new Error("service already registered");
+    if (sameService) {
+      return {
+        status: "already_exists",
+        message: "service already registered",
+      };
     }
 
-    if (urlUsed) {
-      throw new Error("url already used");
-    }
-
+    const nameUsed = this.services.find((s) => s.name === name);
     if (nameUsed) {
       throw new Error("name already used");
     }
 
-    this.services.push(new Service(name, url));
-    JSONSERVICE.write(this.services);
-  }
+    const urlUsed = this.services.find((s) => s.url === url);
+    if (urlUsed) {
+      throw new Error("url already used");
+    }
 
+    const service = new Service(name, url);
+    this.services.push(service);
+    JSONSERVICE.write(this.services);
+
+    return {
+      status: "created",
+      message: "service registered",
+    };
+  }
   unregister(serviceName) {
     const index = this.services.findIndex((s) => s.name === serviceName);
 
@@ -55,10 +61,13 @@ export class ServiceList {
     JSONSERVICE.write(this.services);
   }
 
-  geActiveServicetUrl(serviceName) {
+  getActiveServicetUrl(serviceName) {
     return this.services.find(
       (s) => s.name === serviceName && s.status === "on",
     )?.url;
+  }
+  getActiveServiceName(url) {
+    return this.services.find((s) => s.url === url && s.status === "on")?.name;
   }
 
   getAll() {

@@ -71,8 +71,14 @@ app.all("/svc/:sname/*", async (req, res) => {
   handleRequest(req, res, targetUrl);
 });
 
-app.all("/ip/*", async (req, res) => {
-  let targetUrl = `http://${req.originalUrl.replace(/^\/ip\//, "")}`;
+app.all("/url/*", async (req, res) => {
+  let targetUrl = `${REG_URL}${req.originalUrl}`;
+  if (!targetUrl) return res.status(404).send("Route not handled");
+  handleRequest(req, res, targetUrl);
+});
+
+app.all("/sname/*", async (req, res) => {
+  let targetUrl = `${REG_URL}${req.originalUrl}`;
   if (!targetUrl) return res.status(404).send("Route not handled");
   handleRequest(req, res, targetUrl);
 });

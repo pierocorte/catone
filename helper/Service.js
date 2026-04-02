@@ -1,9 +1,15 @@
 import express from "express";
+import dotenv from "dotenv";
+dotenv.config();
 
-export class Helper {
+export class Service {
   constructor(port, name) {
     this.port = port;
     this.name = name;
+    this.GATEWAY = process.env.GATEWAY;
+
+    this.app = express();
+
     this.server = null;
 
     this.init();
@@ -11,8 +17,7 @@ export class Helper {
     this.signalHandler();
   }
 
-  async init() {
-    this.app = express();
+  init() {
     this.server = this.app.listen(this.port, () => {
       console.log(`${this.name} is running at http://localhost:${this.port}`);
     });
@@ -29,7 +34,7 @@ export class Helper {
   }
 
   async register() {
-    await fetch("http://localhost:3000/reg/service", {
+    await fetch(this.GATEWAY + "/reg/service", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -43,7 +48,7 @@ export class Helper {
   }
 
   async setOn() {
-    await fetch("http://localhost:3000/reg/service/" + this.name, {
+    await fetch(this.GATEWAY + "/reg/service/" + this.name, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -56,7 +61,7 @@ export class Helper {
   }
 
   async setOff() {
-    await fetch("http://localhost:3000/reg/service/" + this.name, {
+    await fetch(this.GATEWAY + "/reg/service/" + this.name, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -69,7 +74,7 @@ export class Helper {
   }
 
   async shutdown() {
-    await fetch("http://localhost:3000/reg/service/" + this.name, {
+    await fetch(this.GATEWAY + "/reg/service/" + this.name, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
