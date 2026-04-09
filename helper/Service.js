@@ -4,8 +4,8 @@ dotenv.config();
 
 export class Service {
   constructor() {
-    this.port = process.env.port || "default";
-    this.name = process.env.name || "default";
+    this.port = process.env.PORT || "default";
+    this.name = process.env.NAME || "default";
     this.GATEWAY = process.env.GATEWAY;
 
     this.app = express();

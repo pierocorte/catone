@@ -1,3 +1,7 @@
 [
- 
+  {
+    "name": "myself",
+    "url": "localhost:3020",
+    "status": "on"
+  }
 ]
