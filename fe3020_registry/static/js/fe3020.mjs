@@ -1,7 +1,12 @@
-import { PiCoComponent } from "http://localhost:3000/lib/v1.2/pc_component.mjs";
-import "http://localhost:3000/lib/v1.2/pc_canvas.mjs";
-import "http://localhost:3000/lib/v1.2/pc_label.mjs";
-import "http://localhost:3000/lib/v1.2/pc_button.mjs";
+
+
+const GATEWAY = "http://localhost:3000";
+import(`${GATEWAY}/lib/pclib/cmps/pc_label.mjs`);
+import(`${GATEWAY}/lib/pclib/cmps/pc_button.mjs`);
+const res = await import(`${GATEWAY}/lib/pclib/cmps/pc_component.mjs`);
+const PiCoComponent = res.PiCoComponent;
+
+
 export default class Fe3020 extends PiCoComponent {
   css() {
     return `
@@ -49,7 +54,7 @@ export default class Fe3020 extends PiCoComponent {
 
     this.interval = setInterval(() => {
       this.loadServices();
-    }, 5000);
+    }, 3000);
   }
 
   renderServices(services) {
@@ -65,7 +70,12 @@ export default class Fe3020 extends PiCoComponent {
       const btn = clone.querySelector("pc-button");
       const lbl = clone.querySelector("pc-label");
 
+
       p.textContent = s.name;
+      console.log(s)
+      if (s.status !== "on") btn.setAttribute("disabled", "");
+      else btn.removeAttribute("disabled");
+
       btn.addEventListener("click", () => {
         this.ping(s.name).then((res) => lbl.setAttribute("text", res.status));
       });
@@ -93,4 +103,4 @@ export default class Fe3020 extends PiCoComponent {
 
 try {
   customElements.define("fe-3020", Fe3020);
-} catch {}
+} catch { }

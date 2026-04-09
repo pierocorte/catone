@@ -8,11 +8,15 @@ async function main() {
 
     setTimeout(async () => {
       await TRAILSV.off();
-    }, 5000);
+    }, 10000);
+
+    setTimeout(async () => {
+      await TRAILSV.on();
+    }, 20000);
 
     setTimeout(async () => {
       await TRAILSV.shutdown();
-    }, 10000);
+    }, 30000);
   } catch (err) {
     console.log(err);
   }
