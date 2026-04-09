@@ -14,7 +14,6 @@ const LIB = process.env.LIB_URL || `http://${BASE_URL}:3010`;
 const REG_URL = process.env.REG_URL || `http://${BASE_URL}:3001`;
 const PINO_LOGGER = process.env.PINO_LOGGER || `http://${BASE_URL}:4000`;
 const APP_URL = "localhost:3020";
-
 // If you need cookies across origins, DON'T use "*" for ACAO.
 // Either strictly allow - list or reflect the origin.
 // const allowedOrigins = new Set([

@@ -3,24 +3,25 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export class Service {
-  constructor(port, name) {
-    this.port = port;
-    this.name = name;
+  constructor() {
+    this.port = process.env.port || "default";
+    this.name = process.env.name || "default";
     this.GATEWAY = process.env.GATEWAY;
 
     this.app = express();
-
     this.server = null;
 
-    this.init();
     this.basicRouteSetup();
     this.signalHandler();
+
+    this.#init();
   }
 
-  init() {
+  #init() {
     this.server = this.app.listen(this.port, () => {
       console.log(`${this.name} is running at http://localhost:${this.port}`);
     });
+    this.#register();
   }
 
   basicRouteSetup() {
@@ -33,7 +34,7 @@ export class Service {
     process.on("SIGTERM", () => this.shutdown());
   }
 
-  async register() {
+  async #register() {
     await fetch(this.GATEWAY + "/reg/service", {
       method: "POST",
       headers: {
@@ -44,10 +45,9 @@ export class Service {
         url: `localhost:${this.port}`,
       }),
     });
-    console.log("i'm registered");
   }
 
-  async setOn() {
+  async on() {
     await fetch(this.GATEWAY + "/reg/service/" + this.name, {
       method: "PATCH",
       headers: {
@@ -60,7 +60,7 @@ export class Service {
     console.log("i'm on");
   }
 
-  async setOff() {
+  async off() {
     await fetch(this.GATEWAY + "/reg/service/" + this.name, {
       method: "PATCH",
       headers: {

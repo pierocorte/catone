@@ -82,6 +82,7 @@ export default class Fe3020 extends PiCoComponent {
     fetch("http://localhost:3000/reg/service")
       .then((response) => response.json())
       .then((data) => {
+        console.log(data);
         this.renderServices(data);
       })
       .catch((error) => {

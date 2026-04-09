@@ -45,13 +45,13 @@ app.post("/service", (req, res) => {
 });
 
 //deregistra il servizio
-app.delete("/service/:sName", (req, res) => {
-  const { sName } = req.params;
+app.delete("/service/:name", (req, res) => {
+  const { name } = req.params;
   try {
-    if (!sName) {
+    if (!name) {
       return res.status(400).json({ error: "service's name is required" });
     }
-    SERVICES.unregister(sName);
+    SERVICES.unregister(name);
     return res.status(204).json({ message: "service unregistered" });
   } catch (err) {
     return res.status(404).json({ error: err.message });
@@ -72,8 +72,8 @@ app.get("/service", (req, res) => {
 
 //con nome servizio ti restiusice l'endpoint
 app.get("/url/:name", (req, res) => {
-  const sName = req.params.name;
-  const url = SERVICES.getActiveServicetUrl(sName);
+  const name = req.params.name;
+  const url = SERVICES.getActiveServicetUrl(name);
   if (!url) {
     return res.status(404).json({ message: "no service active found" });
   }
@@ -81,7 +81,7 @@ app.get("/url/:name", (req, res) => {
 });
 
 //con endpoint servizio restituisce nome logico
-app.get("/sname/:endpoint", (req, res) => {
+app.get("/name/:endpoint", (req, res) => {
   const endpoint = req.params.endpoint;
   const name = SERVICES.getActiveServiceName(endpoint);
   if (!name) {
