@@ -1,0 +1,152 @@
+# Influx REST API Microservice
+
+## Description
+
+This microservice exposes a REST API based on Express that allows querying an InfluxDB database using SQL queries.
+
+The API enables dynamic retrieval of observations, devices, and metrics based on the provided parameters.
+
+---
+
+## Requirements
+
+To run the service, the following are required:
+
+* Node.js
+* Express
+* Docker Desktop (to run InfluxDB or other related services)
+
+---
+
+## Installation
+
+Clone the repository and install dependencies:
+
+```bash
+npm install
+```
+
+---
+
+## Configuration
+
+The service uses environment variables defined in the `.env` file:
+
+```
+name=your_service_name
+port=your_service_port   # default: 1234
+
+DB_NAME=your_db_name
+DB_TOKEN=your_token
+DB_HOST=localhost
+DB_PORT=8086
+```
+
+---
+
+## Running the service
+
+To start the microservice:
+
+```bash
+npm start
+```
+
+The service will be available on the configured port (default: 1234).
+
+---
+
+## Endpoints
+
+### 1. Get observations by device
+
+```
+GET /:deviceClass/:id/observations
+```
+
+Retrieves observations for a specific device.
+
+#### Query params:
+
+* `start` → start timestamp
+* `end` → end timestamp
+* `metric` → list of metrics (comma-separated)
+* `device` → list of devices (optional)
+
+---
+
+### 2. Get observations by class
+
+```
+GET /:deviceClass/observations
+```
+
+Retrieves observations for a device class.
+
+---
+
+### 3. Get specific device
+
+```
+GET /:deviceClass/:id
+```
+
+Returns data for a specific device.
+
+---
+
+### 4. Get device list
+
+```
+GET /:deviceClass
+```
+
+Returns the list of available devices (`DISTINCT device_id`).
+
+---
+
+## Query Construction
+
+The service dynamically builds SQL queries in the form:
+
+```sql
+SELECT <columns> FROM <deviceClass> WHERE <conditions>
+```
+
+### Clauses:
+
+* `SELECT` → requested columns (metrics)
+* `FROM` → device class
+* `WHERE` → dynamic filters:
+
+  * time range (`start`, `end`)
+  * `device_id`
+  * list of devices
+
+---
+
+## Notes
+
+* If no time range is specified, the following condition is applied:
+
+  ```
+  time <= now()
+  ```
+
+* Metrics can be passed as a comma-separated list.
+
+---
+
+## Example request
+
+```bash
+GET http://localhost:2000/positions/observations?device=86179d4a7a8412246bb9e90060aea504,1234&metric=latitude_lat
+
+GET http://localhost:2000/positions/86179d4a7a8412246bb9e90060aea504?metric=latitude_lat
+
+GET http://localhost:2000/positions/observations?device=1234,86179d4a7a8412246bb9e90060aea504
+```
+
+---
+
+Microservice based on Express for integration with the InfluxDB SQL API.
